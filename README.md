@@ -16,7 +16,7 @@ A [MagicMirror²](https://github.com/MichMich/MagicMirror) module that displays 
 
 ```bash
 cd ~/MagicMirror/modules
-git clone https://github.com/yourusername/MMM-WasteReminder.git
+git clone https://github.com/fischi87/MMM-WasteReminder.git
 cd MMM-WasteReminder
 npm install
 ```
@@ -68,23 +68,24 @@ npm install
     },
     calendarTriggerBefore: 18,       // Hours before event to trigger (18 = day before at 18:00)
 
-    // Waste Types (customize your bins)
+    // Waste Types (customize icons and labels)
+    // You can use your own image file names!
     wasteTypes: {
       wasteYellow: {
-        icon: "images/yellow.png",
-        label: "Yellow Bin"
+        icon: "images/gelbe-tonne.png",    // Use your own filename
+        label: "Gelbe Tonne"
       },
       wasteBlue: {
-        icon: "images/blue.png",
-        label: "Paper"
+        icon: "images/papier-tonne.png",   // Use your own filename
+        label: "Papier"
       },
       wasteBlack: {
-        icon: "images/black.png",
-        label: "Residual Waste"
+        icon: "images/restmuell-tonne.png", // Use your own filename
+        label: "Restmüll"
       },
       wasteBio: {
-        icon: "images/bio.png",
-        label: "Organic Waste"
+        icon: "images/bio-tonne.png",      // Use your own filename
+        label: "Biotonne"
       }
     },
 
@@ -187,7 +188,11 @@ mosquitto_pub -h localhost -t "mqtt/0/waste/state" -m "off"
 
 ### Custom Icons
 
-Replace the default icons in the `images/` directory with your own PNG files:
+You have two options to use custom icons:
+
+#### Option 1: Replace Default Images
+
+Replace the default icons in the `images/` directory with your own PNG files (keeping the same names):
 
 ```
 MMM-WasteReminder/
@@ -198,13 +203,42 @@ MMM-WasteReminder/
     └── bio.png
 ```
 
-Or specify custom paths in the config:
+#### Option 2: Configure Custom Image Names (Recommended)
+
+Specify your own image file names in the `wasteTypes` configuration. This allows you to use any file names you prefer:
 
 ```javascript
 wasteTypes: {
   wasteYellow: {
-    icon: "modules/MMM-WasteReminder/my-icons/custom-yellow.png",
+    icon: "images/gelbe-tonne.png",      // Your custom filename
+    label: "Gelbe Tonne"
+  },
+  wasteBlue: {
+    icon: "images/papier-tonne.png",     // Your custom filename
+    label: "Papier"
+  },
+  wasteBlack: {
+    icon: "images/restmuell.png",        // Your custom filename
+    label: "Restmüll"
+  },
+  wasteBio: {
+    icon: "images/bio-tonne.png",        // Your custom filename
+    label: "Biotonne"
+  }
+}
+```
+
+You can also use absolute paths or paths to other module directories:
+
+```javascript
+wasteTypes: {
+  wasteYellow: {
+    icon: "modules/MMM-WasteReminder/custom-icons/my-yellow.png",
     label: "Yellow Bin"
+  },
+  wasteBlue: {
+    icon: "modules/MMM-MyIcons/paper.png",  // From another module
+    label: "Paper"
   }
 }
 ```

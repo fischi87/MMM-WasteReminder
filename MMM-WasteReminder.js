@@ -39,22 +39,23 @@ Module.register("MMM-WasteReminder", {
     },
     calendarTriggerBefore: 18, // Hours before event to trigger (18 = day before at 18:00)
 
-    // Waste Types
+    // Waste Types - Customize icon paths and labels as needed
+    // You can use your own image file names, e.g., "images/gelbe-tonne.png"
     wasteTypes: {
       wasteYellow: {
-        icon: "images/yellow.png",
+        icon: "images/yellow.png", // Customize: use your own filename
         label: "Gelbe Tonne",
       },
       wasteBlue: {
-        icon: "images/blue.png",
+        icon: "images/blue.png", // Customize: use your own filename
         label: "Papier",
       },
       wasteBlack: {
-        icon: "images/black.png",
+        icon: "images/black.png", // Customize: use your own filename
         label: "Restmüll",
       },
       wasteBio: {
-        icon: "images/bio.png",
+        icon: "images/bio.png", // Customize: use your own filename
         label: "Biotonne",
       },
     },
