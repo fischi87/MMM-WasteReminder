@@ -205,7 +205,7 @@ Module.register("MMM-WasteReminder", {
     const titleLower = title.toLowerCase();
 
     for (let keyword in this.config.calendarKeywords) {
-      if (titleLower.includes(keyword)) {
+      if (titleLower.includes(keyword.toLowerCase())) {
         return this.config.calendarKeywords[keyword];
       }
     }
