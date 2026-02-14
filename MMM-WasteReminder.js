@@ -179,20 +179,17 @@ Module.register("MMM-WasteReminder", {
     for (let event of events) {
       if (!event.startDate || !event.title) continue;
 
-      const eventStart = event.startDate;
+      const eventStart = Number(event.startDate);
+      const wasteType = this.matchEventToWasteType(event.title);
 
       // Check if event is upcoming and within trigger window
       // e.g. triggerBefore=18h: show reminder up to 18 hours before the event
-      if (eventStart >= now && eventStart <= now + triggerWindowMs) {
-        const wasteType = this.matchEventToWasteType(event.title);
-
-        if (wasteType) {
-          this.log(
-            "Calendar event matched: " + event.title + " -> " + wasteType,
-          );
-          this.setWasteType(wasteType);
-          break; // Only show one at a time
-        }
+      if (eventStart >= now && eventStart <= now + triggerWindowMs && wasteType) {
+        this.log(
+          "Calendar event matched: " + event.title + " -> " + wasteType,
+        );
+        this.setWasteType(wasteType);
+        break; // Only show one at a time
       }
     }
   },
