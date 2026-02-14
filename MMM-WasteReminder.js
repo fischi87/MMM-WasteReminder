@@ -75,7 +75,6 @@ Module.register("MMM-WasteReminder", {
   // Current state
   currentWasteType: null,
   hideTimer: null,
-  calendarCheckInterval: null,
 
   start: function () {
     Log.info("Starting module: " + this.name);
@@ -170,19 +169,21 @@ Module.register("MMM-WasteReminder", {
    */
   processCalendarEvents: function (events) {
     if (!this.config.calendarEnabled) return;
+    if (!Array.isArray(events) || events.length === 0) return;
 
-    const now = new Date();
-    const triggerTime = new Date(
-      now.getTime() + this.config.calendarTriggerBefore * 60 * 60 * 1000,
-    );
+    const now = Date.now();
+    const triggerWindowMs = this.config.calendarTriggerBefore * 60 * 60 * 1000;
 
     this.log("Processing " + events.length + " calendar events");
 
     for (let event of events) {
-      const eventStart = new Date(event.startDate);
+      if (!event.startDate || !event.title) continue;
 
-      // Check if event is within trigger window
-      if (eventStart >= now && eventStart <= triggerTime) {
+      const eventStart = event.startDate;
+
+      // Check if event is upcoming and within trigger window
+      // e.g. triggerBefore=18h: show reminder up to 18 hours before the event
+      if (eventStart >= now && eventStart <= now + triggerWindowMs) {
         const wasteType = this.matchEventToWasteType(event.title);
 
         if (wasteType) {
@@ -215,18 +216,10 @@ Module.register("MMM-WasteReminder", {
 
   /**
    * Start monitoring calendar events
+   * Listens passively for CALENDAR_EVENTS broadcasts from the calendar module
    */
   startCalendarMonitoring: function () {
-    // Request calendar events immediately
-    this.sendNotification("CALENDAR_EVENTS");
-
-    // Check every 30 minutes
-    this.calendarCheckInterval = setInterval(
-      () => {
-        this.sendNotification("CALENDAR_EVENTS");
-      },
-      30 * 60 * 1000,
-    );
+    this.log("Calendar monitoring started - listening for CALENDAR_EVENTS broadcasts");
   },
 
   /**
@@ -271,8 +264,8 @@ Module.register("MMM-WasteReminder", {
 
     this.log(
       "Auto-hide scheduled in " +
-        (msUntilHide / 1000 / 60 / 60).toFixed(1) +
-        " hours",
+      (msUntilHide / 1000 / 60 / 60).toFixed(1) +
+      " hours",
     );
 
     this.hideTimer = setTimeout(() => {
@@ -313,9 +306,6 @@ Module.register("MMM-WasteReminder", {
   stop: function () {
     if (this.hideTimer) {
       clearTimeout(this.hideTimer);
-    }
-    if (this.calendarCheckInterval) {
-      clearInterval(this.calendarCheckInterval);
     }
   },
 });
