@@ -6,6 +6,7 @@ A [MagicMirror²](https://github.com/MichMich/MagicMirror) module that displays 
 
 - 🎯 **Multiple Data Sources**: MQTT, Calendar, or both
 - 🗑️ **Customizable Waste Types**: Yellow, Blue, Black, Bio bins (fully configurable)
+- ♻️ **Multiple Bins at Once**: Show several bins side by side when collected on the same day
 - ⏰ **Auto-Hide Timer**: Automatically hide reminders at a specific time
 - 🎨 **Custom Icons**: Replace default icons with your own
 - 📱 **MQTT Control**: Trigger via ioBroker, Mosquitto, or any MQTT client
@@ -118,6 +119,9 @@ setState("mqtt.0.waste.state", "wasteYellow");
 // Show blue bin
 setState("mqtt.0.waste.state", "wasteBlue");
 
+// Show yellow and paper bin at the same time (comma-separated)
+setState("mqtt.0.waste.state", "wasteYellow,wasteBlue");
+
 // Hide all
 setState("mqtt.0.waste.state", "off");
 ```
@@ -127,9 +131,9 @@ setState("mqtt.0.waste.state", "off");
 ```javascript
 // Schedule for next waste collection
 schedule("0 18 * * 6", function () {
-  // Every Saturday at 18:00
-  setState("mqtt.0.waste.state", "wasteYellow");
-  log("Yellow bin reminder activated");
+  // Every Saturday at 18:00 — yellow and paper collected together
+  setState("mqtt.0.waste.state", "wasteYellow,wasteBlue");
+  log("Yellow + paper bin reminder activated");
 });
 ```
 
@@ -141,6 +145,12 @@ mosquitto_pub -h localhost -t "mqtt/0/waste/state" -m "wasteYellow"
 
 # Show blue bin
 mosquitto_pub -h localhost -t "mqtt/0/waste/state" -m "wasteBlue"
+
+# Show yellow and paper bin at the same time
+mosquitto_pub -h localhost -t "mqtt/0/waste/state" -m "wasteYellow,wasteBlue"
+
+# Show multiple bins via JSON array
+mosquitto_pub -h localhost -t "mqtt/0/waste/state" -m '["wasteYellow","wasteBio"]'
 
 # Hide
 mosquitto_pub -h localhost -t "mqtt/0/waste/state" -m "off"
@@ -156,6 +166,7 @@ mosquitto_pub -h localhost -t "mqtt/0/waste/state" -m "off"
    - "Biotonne" / "Organic Waste"
 
 3. The module will automatically display the reminder 18 hours before the event (configurable)
+4. If multiple events fall within the trigger window on the same day, all matching bins are shown simultaneously
 
 **Example Calendar Config:**
 
@@ -176,13 +187,15 @@ mosquitto_pub -h localhost -t "mqtt/0/waste/state" -m "off"
 
 ## MQTT Message Reference
 
-| Value         | Description                  |
-| ------------- | ---------------------------- |
-| `wasteYellow` | Display yellow bin           |
-| `wasteBlue`   | Display blue bin (paper)     |
-| `wasteBlack`  | Display black bin (residual) |
-| `wasteBio`    | Display bio bin              |
-| `off`         | Hide all bins                |
+| Value                          | Description                          |
+| ------------------------------ | ------------------------------------ |
+| `wasteYellow`                  | Display yellow bin                   |
+| `wasteBlue`                    | Display blue bin (paper)             |
+| `wasteBlack`                   | Display black bin (residual)         |
+| `wasteBio`                     | Display bio bin                      |
+| `wasteYellow,wasteBlue`        | Display yellow + paper simultaneously |
+| `["wasteYellow","wasteBio"]`   | Display yellow + bio (JSON array)    |
+| `off`                          | Hide all bins                        |
 
 ## Customization
 
@@ -298,11 +311,10 @@ Add custom animations in `~/MagicMirror/css/custom.css`:
 | `autoHideNextDayAt`     | String  | `"10:00"`                 | Time to auto-hide (HH:MM format)                 |
 | `debug`                 | Boolean | `false`                   | Enable debug logging                             |
 
-## Roadmap (v1.1+)
+## Roadmap
 
 - [ ] Direct iCal URL support
 - [ ] CSV file import
-- [ ] Multiple waste types simultaneously
 - [ ] Notification sounds
 - [ ] Custom notification messages
 
