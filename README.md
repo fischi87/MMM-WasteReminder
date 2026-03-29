@@ -6,6 +6,7 @@ A [MagicMirror²](https://github.com/MichMich/MagicMirror) module that displays 
 
 - 🎯 **Multiple Data Sources**: MQTT, Calendar, or both
 - 🗑️ **Customizable Waste Types**: Yellow, Blue, Black, Bio bins (fully configurable)
+- 📦 **Multiple Bins on Same Day**: All matching calendar events on the same day are shown simultaneously
 - ⏰ **Auto-Hide Timer**: Automatically hide reminders at a specific time
 - 🎨 **Custom Icons**: Replace default icons with your own
 - 📱 **MQTT Control**: Trigger via ioBroker, Mosquitto, or any MQTT client
@@ -156,6 +157,7 @@ mosquitto_pub -h localhost -t "mqtt/0/waste/state" -m "off"
    - "Biotonne" / "Organic Waste"
 
 3. The module will automatically display the reminder 18 hours before the event (configurable)
+4. If multiple waste collections fall on the same day, all matching icons are displayed side by side
 
 **Example Calendar Config:**
 
@@ -302,7 +304,6 @@ Add custom animations in `~/MagicMirror/css/custom.css`:
 
 - [ ] Direct iCal URL support
 - [ ] CSV file import
-- [ ] Multiple waste types simultaneously
 - [ ] Notification sounds
 - [ ] Custom notification messages
 

@@ -73,12 +73,12 @@ Module.register("MMM-WasteReminder", {
   },
 
   // Current state
-  currentWasteType: null,
+  currentWasteTypes: [],
   hideTimer: null,
 
   start: function () {
     Log.info("Starting module: " + this.name);
-    this.currentWasteType = null;
+    this.currentWasteTypes = [];
 
     // Start node_helper if MQTT is enabled
     if (
@@ -107,9 +107,9 @@ Module.register("MMM-WasteReminder", {
     const wrapper = document.createElement("div");
     wrapper.className = "waste-reminder-wrapper";
 
-    // Show current waste type if set
-    if (this.currentWasteType && this.currentWasteType !== "off") {
-      const wasteConfig = this.config.wasteTypes[this.currentWasteType];
+    // Show all current waste types
+    for (const wasteType of this.currentWasteTypes) {
+      const wasteConfig = this.config.wasteTypes[wasteType];
 
       if (wasteConfig) {
         const container = document.createElement("div");
@@ -149,7 +149,7 @@ Module.register("MMM-WasteReminder", {
   socketNotificationReceived: function (notification, payload) {
     if (notification === "MQTT_STATE_CHANGED") {
       this.log("MQTT state changed: " + payload);
-      this.setWasteType(payload);
+      this.setWasteTypes(payload === "off" ? [] : [payload]);
     } else if (notification === "MQTT_ERROR") {
       Log.error("MQTT Error: " + payload);
     } else if (notification === "MQTT_CONNECTED") {
@@ -176,6 +176,8 @@ Module.register("MMM-WasteReminder", {
 
     this.log("Processing " + events.length + " calendar events");
 
+    const matchedTypes = new Set();
+
     for (let event of events) {
       if (!event.startDate || !event.title) continue;
 
@@ -188,9 +190,12 @@ Module.register("MMM-WasteReminder", {
         this.log(
           "Calendar event matched: " + event.title + " -> " + wasteType,
         );
-        this.setWasteType(wasteType);
-        break; // Only show one at a time
+        matchedTypes.add(wasteType);
       }
+    }
+
+    if (matchedTypes.size > 0) {
+      this.setWasteTypes(Array.from(matchedTypes));
     }
   },
 
@@ -220,10 +225,10 @@ Module.register("MMM-WasteReminder", {
   },
 
   /**
-   * Set the current waste type to display
+   * Set the current waste types to display (array)
    */
-  setWasteType: function (wasteType) {
-    this.log("Setting waste type to: " + wasteType);
+  setWasteTypes: function (wasteTypes) {
+    this.log("Setting waste types to: " + wasteTypes.join(", "));
 
     // Clear existing timer
     if (this.hideTimer) {
@@ -232,13 +237,13 @@ Module.register("MMM-WasteReminder", {
     }
 
     // Update state
-    this.currentWasteType = wasteType;
+    this.currentWasteTypes = wasteTypes;
 
     // Update display
     this.updateDom(this.config.animationSpeed);
 
-    // Set auto-hide timer if not "off"
-    if (wasteType !== "off" && this.config.autoHideNextDayAt) {
+    // Set auto-hide timer if any types are active
+    if (wasteTypes.length > 0 && this.config.autoHideNextDayAt) {
       this.scheduleAutoHide();
     }
   },
@@ -267,7 +272,7 @@ Module.register("MMM-WasteReminder", {
 
     this.hideTimer = setTimeout(() => {
       this.log("Auto-hide triggered");
-      this.setWasteType("off");
+      this.setWasteTypes([]);
     }, msUntilHide);
   },
 
